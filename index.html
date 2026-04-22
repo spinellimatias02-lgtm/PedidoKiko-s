@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiko´s Burguer - Pedidos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
     <style>
         :root { 
             --kiko-red: #e63946; 
             --kiko-yellow: #ffb703; 
+            --kiko-orange-neon: #ff6600; /* Naranja más vivo para las letras */
             --kiko-green: #25d366;
         }
 
         body { 
-            /* Fondo realista de hamburguesa */
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
                         url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=2072&auto=format&fit=crop');
             background-size: cover;
@@ -24,15 +25,34 @@
         }
 
         .navbar { 
-            background-color: var(--kiko-red); 
+            /* Fondo de pared de ladrillos expuestos */
+            background-image: url('https://images.unsplash.com/photo-1582216839352-f67f6b0f37d0?q=80&w=1600&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border-radius: 0 0 20px 20px;
+            padding: 15px 0;
+        }
+
+        .navbar-brand.h1 {
+            /* Tipografía estilizada */
+            font-family: 'Permanent Marker', cursive;
+            font-size: 2.5rem;
+            /* Letras naranjas con borde negro */
+            color: var(--kiko-orange-neon) !important;
+            text-shadow: 
+                -2px -2px 0 #000,  
+                 2px -2px 0 #000,
+                -2px  2px 0 #000,
+                 2px  2px 0 #000,
+                 3px 3px 10px rgba(0,0,0,0.8); /* Sombra para profundidad */
+            letter-spacing: 2px;
         }
 
         .card { 
             background: rgba(255, 255, 255, 0.95); 
             border: none; 
-            border-radius: 25px; /* Bordes redondeados */
+            border-radius: 25px; 
             overflow: hidden;
             transition: transform 0.3s;
             color: #333;
@@ -53,7 +73,7 @@
             width: 100%; 
             padding: 15px; 
             font-size: 1.2rem; 
-            border-radius: 50px; /* Botón súper redondeado */
+            border-radius: 50px; 
             border: none;
             box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
         }
@@ -83,7 +103,7 @@
 <body>
 
 <nav class="navbar sticky-top">
-    <div class="container justify-content-center">
+    <div class="container justify-content-center text-center">
         <span class="navbar-brand mb-0 h1">🍔 KIKO´S BURGUER</span>
     </div>
 </nav>
@@ -130,7 +150,7 @@
 
         <div class="col-6 col-md-3">
             <div class="card h-100 shadow">
-                <img src="https://images.unsplash.com/photo-1525164286253-04e68b9d94bb?q=80&w=500&auto=format&fit=crop" class="card-img-top" alt="Eggcelent">
+                <img src="https://images.unsplash.com/photo-1621813136284-f3c5b8b8f2d7?q=80&w=500&auto=format&fit=crop" class="card-img-top" alt="Eggcelent">
                 <div class="card-body p-2 text-center">
                     <h6>Eggcelent</h6>
                     <p class="small text-muted mb-1">Doble carne, cebolla y huevo a la plancha</p>
@@ -166,7 +186,7 @@
 
 <script>
     function enviarPedido() {
-        const miTelefono = "5491165954925"; // Número corregido
+        const miTelefono = "5491165954925"; // Número configurado
 
         const nombre = document.getElementById('userName').value;
         const direccion = document.getElementById('userAddress').value;
