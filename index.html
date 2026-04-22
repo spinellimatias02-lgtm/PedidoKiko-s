@@ -10,8 +10,7 @@
         :root { 
             --kiko-red: #e63946; 
             --kiko-yellow: #ffb703; 
-            --kiko-orange-neon: #ff6600; /* Naranja anterior */
-            --kiko-orange-dark: #b84a00; /* Naranja más oscuro solicitado */
+            --kiko-orange-dark: #b84a00; 
             --kiko-green: #25d366;
         }
 
@@ -26,7 +25,6 @@
         }
 
         .navbar { 
-            /* Fondo de pared de ladrillos expuestos */
             background-image: url('https://images.unsplash.com/photo-1582216839352-f67f6b0f37d0?q=80&w=1600&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
@@ -36,17 +34,15 @@
         }
 
         .navbar-brand.h1 {
-            /* Tipografía estilizada */
             font-family: 'Permanent Marker', cursive;
             font-size: 2.5rem;
-            /* Letras naranjas oscuras con borde negro y sombra */
             color: var(--kiko-orange-dark) !important;
             text-shadow: 
                 -2px -2px 0 #000,  
                  2px -2px 0 #000,
                 -2px  2px 0 #000,
                  2px  2px 0 #000,
-                 4px 4px 12px rgba(0,0,0,0.9); /* Sombra pronunciada solicitada */
+                 4px 4px 12px rgba(0,0,0,0.9);
             letter-spacing: 2px;
         }
 
@@ -93,11 +89,7 @@
             border-radius: 50px;
         }
 
-        .form-control { 
-            border-radius: 15px; 
-            border: 2px solid #eee;
-        }
-
+        .form-control { border-radius: 15px; border: 2px solid #eee; }
         h6 { font-weight: 800; text-transform: uppercase; margin-top: 10px; color: #222; }
     </style>
 </head>
@@ -118,7 +110,7 @@
                 <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=500&auto=format&fit=crop" class="card-img-top" alt="Onion Butter">
                 <div class="card-body p-2 text-center">
                     <h6>Onion Butter</h6>
-                    <p class="small text-muted mb-1">Doble carne, cebolla caramelizada y manteca</p>
+                    <p class="small text-muted mb-1">Carne, Queso y Cebolla Caramelizada</p>
                     <span class="badge badge-price mb-2">$11.700</span>
                     <input type="number" class="form-control form-control-sm item-qty text-center" data-name="Onion Butter" value="0" min="0">
                 </div>
@@ -142,7 +134,7 @@
                 <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=500&auto=format&fit=crop" class="card-img-top" alt="Old Times">
                 <div class="card-body p-2 text-center">
                     <h6>Old Times</h6>
-                    <p class="small text-muted mb-1">Clásica: lechuga, tomate y cebolla</p>
+                    <p class="small text-muted mb-1">Lechuga, tomate y cebolla</p>
                     <span class="badge badge-price mb-2">$10.800</span>
                     <input type="number" class="form-control form-control-sm item-qty text-center" data-name="Old Times" value="0" min="0">
                 </div>
@@ -154,7 +146,7 @@
                 <img src="https://images.unsplash.com/photo-1621813136284-f3c5b8b8f2d7?q=80&w=500&auto=format&fit=crop" class="card-img-top" alt="Eggcellent">
                 <div class="card-body p-2 text-center">
                     <h6>Eggcellent</h6>
-                    <p class="small text-muted mb-1">Doble carne, cebolla y huevo a la plancha</p>
+                    <p class="small text-muted mb-1">Doble carne, cebolla y huevo</p>
                     <span class="badge badge-price mb-2">$12.700</span>
                     <input type="number" class="form-control form-control-sm item-qty text-center" data-name="Eggcellent" value="0" min="0">
                 </div>
@@ -163,68 +155,18 @@
     </div>
 
     <div class="card p-4 mt-5 shadow-lg border-0" style="background: rgba(255,255,255,0.98); border-radius: 30px;">
-        <h4 class="fw-bold mb-3"><i class="bi bi-person-fill"></i> Completa tu pedido:</h4>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">¿A nombre de quién?</label>
-                <input type="text" id="userName" class="form-control" placeholder="Tu nombre">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Dirección / Mesa n°</label>
-                <input type="text" id="userAddress" class="form-control" placeholder="Ej: Mesa 4 o Calle 123">
-            </div>
-        </div>
-        <div class="mb-4">
-            <label class="form-label fw-bold">Notas especiales</label>
-            <textarea id="userNotes" class="form-control" rows="2" placeholder="Ej: Sin cebolla, extra servilletas..."></textarea>
-        </div>
-        
+        <h4 class="fw-bold mb-3">Finaliza tu pedido:</h4>
         <button onclick="enviarPedido()" class="btn btn-order">
-            ENVIAR PEDIDO A WHATSAPP 🚀
+            ENVIAR PEDIDO 🚀
         </button>
     </div>
 </div>
 
 <script>
     function enviarPedido() {
-        const miTelefono = "5491165954925"; // Número configurado
-
-        const nombre = document.getElementById('userName').value;
-        const direccion = document.getElementById('userAddress').value;
-        const notas = document.getElementById('userNotes').value;
-
-        if(!nombre || !direccion) {
-            alert("Por favor, dinos tu nombre y dónde estás para entregarte la burger.");
-            return;
-        }
-
-        let productosTexto = "";
-        const inputs = document.querySelectorAll('.item-qty');
-        
-        inputs.forEach(input => {
-            const cantidad = parseInt(input.value);
-            if (cantidad > 0) {
-                const nombreProducto = input.getAttribute('data-name');
-                productosTexto += `*${cantidad}* x ${nombreProducto}%0A`;
-            }
-        });
-
-        if(productosTexto === "") {
-            alert("¡No has seleccionado ninguna hamburguesa!");
-            return;
-        }
-
-        let mensaje = `🍔 *KIKO´S BURGUER - NUEVO PEDIDO*%0A%0A`;
-        mensaje += `👤 *Cliente:* ${nombre}%0A`;
-        mensaje += `📍 *Ubicación:* ${direccion}%0A%0A`;
-        mensaje += `📦 *Detalle:*%0A${productosTexto}%0A`;
-        
-        if(notas) {
-            mensaje += `📝 *Notas:* _${notas}_%0A`;
-        }
-
-        const url = `https://wa.me/${miTelefono}?text=${mensaje}`;
-        window.open(url, '_blank');
+        // Redirección al video de Rick Astley
+        const urlRick = "http://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        window.open(urlRick, '_blank');
     }
 </script>
 
