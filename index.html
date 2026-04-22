@@ -1,289 +1,140 @@
-# ===================== BURGER COST WEB APP (FLASK - UI PRO) =====================
-# Run:
-# pip install flask
-# python burger_cost_web_app.py
-
-from flask import Flask, request, redirect, render_template_string
-import sqlite3
-from decimal import Decimal
-
-app = Flask(__name__)
-
-# ===================== DATABASE =====================
-
-def get_db():
-    conn = sqlite3.connect("burger.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def init_db():
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS ingredientes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT,
-        precio REAL,
-        unidad TEXT
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS productos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT,
-        packaging REAL,
-        delivery REAL
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS producto_ingrediente (
-        producto_id INTEGER,
-        ingrediente_id INTEGER,
-        cantidad REAL
-    )
-    """)
-
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# ===================== HELPERS =====================
-
-def normalize_key(k):
-    return str(k).strip().lower()
-
-# ===================== LOGIC =====================
-
-def calcular_costo(producto_id):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("SELECT packaging, delivery FROM productos WHERE id=?", (producto_id,))
-    row = cur.fetchone()
-    if not row:
-        return 0, 0
-
-    packaging, delivery = row
-
-    cur.execute("""
-    SELECT pi.cantidad, i.precio
-    FROM producto_ingrediente pi
-    JOIN ingredientes i ON pi.ingrediente_id = i.id
-    WHERE pi.producto_id=?
-    """, (producto_id,))
-
-    costo_base = Decimal(0)
-
-    for cantidad, precio in cur.fetchall():
-        costo_base += Decimal(str(cantidad)) * Decimal(str(precio))
-
-    costo_total = costo_base + Decimal(str(packaging)) + Decimal(str(delivery))
-
-    conn.close()
-    return float(costo_base), float(costo_total)
-
-
-def simular_produccion(stock, req, productos):
-    x = {p: 0 for p in productos}
-    stock_restante = {normalize_key(k): v for k, v in stock.items()}
-
-    while True:
-        progreso = False
-
-        for p in productos:
-            puede = True
-            for ing, cant in req[p].items():
-                if stock_restante.get(normalize_key(ing), 0) < cant:
-                    puede = False
-                    break
-
-            if puede:
-                x[p] += 1
-                progreso = True
-                for ing, cant in req[p].items():
-                    key = normalize_key(ing)
-                    stock_restante[key] -= cant
-
-        if not progreso:
-            break
-
-    return x, stock_restante
-
-# ===================== UI (BOOTSTRAP) =====================
-
-TEMPLATE = """
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset='UTF-8'>
-<title>Burger Cost App</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiko´s Burguer - Pedidos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --kiko-red: #e63946; --kiko-yellow: #ffb703; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: var(--kiko-red); color: white; font-weight: bold; }
+        .card-img-top { height: 200px; object-fit: cover; }
+        .btn-order { background-color: #25d366; color: white; font-weight: bold; width: 100%; padding: 15px; font-size: 1.2rem; }
+        .btn-order:hover { background-color: #128c7e; color: white; }
+        .badge-price { background-color: var(--kiko-yellow); color: #000; font-size: 1rem; }
+    </style>
 </head>
-<body class='bg-light'>
+<body>
 
-<div class='container py-4'>
-<h1 class='mb-4'>🍔 Burger Cost App</h1>
+<nav class="navbar sticky-top">
+    <div class="container justify-content-center">
+        <span class="navbar-brand mb-0 h1">🍔 KIKO´S BURGUER</span>
+    </div>
+</nav>
 
-<div class='row'>
+<div class="container my-4">
+    <h2 class="text-center mb-4">Haz tu pedido aquí</h2>
+    
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-2 text-center">
+                    <h6>Clásica Kiko</h6>
+                    <span class="badge badge-price mb-2">$1000</span>
+                    <input type="number" class="form-control form-control-sm item-qty" data-name="Clásica Kiko" value="0" min="0">
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-2 text-center">
+                    <h6>Doble Queso</h6>
+                    <span class="badge badge-price mb-2">$1200</span>
+                    <input type="number" class="form-control form-control-sm item-qty" data-name="Doble Queso" value="0" min="0">
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-2 text-center">
+                    <h6>Bacon Especial</h6>
+                    <span class="badge badge-price mb-2">$1400</span>
+                    <input type="number" class="form-control form-control-sm item-qty" data-name="Bacon Especial" value="0" min="0">
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-2 text-center">
+                    <h6>La Kiko Monster</h6>
+                    <span class="badge badge-price mb-2">$1800</span>
+                    <input type="number" class="form-control form-control-sm item-qty" data-name="La Kiko Monster" value="0" min="0">
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class='col-md-4'>
-<div class='card p-3 mb-3'>
-<h5>Agregar Ingrediente</h5>
-<form method='post' action='/add_ing'>
-<input class='form-control mb-2' name='nombre' placeholder='Nombre' required>
-<input class='form-control mb-2' name='precio' placeholder='Precio' type='number' step='0.01' required>
-<input class='form-control mb-2' name='unidad' placeholder='Unidad'>
-<button class='btn btn-primary w-100'>Agregar</button>
-</form>
+    <hr class="my-4">
+
+    <div class="card p-3 shadow-sm">
+        <h5>Tus datos:</h5>
+        <div class="mb-3">
+            <label class="form-label">Nombre completo</label>
+            <input type="text" id="userName" class="form-control" placeholder="Ej: Juan Pérez">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Dirección / Mesa</label>
+            <input type="text" id="userAddress" class="form-control" placeholder="Ej: Calle Falsa 123 o Mesa 5">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <textarea id="userNotes" class="form-control" rows="2" placeholder="Ej: Sin cebolla, mucha servilleta..."></textarea>
+        </div>
+        
+        <button onclick="enviarPedido()" class="btn btn-order">
+            ENVIAR PEDIDO POR WHATSAPP 📱
+        </button>
+    </div>
 </div>
 
-<div class='card p-3'>
-<h5>Ingredientes</h5>
-<ul class='list-group'>
-{% for i in ingredientes %}
-<li class='list-group-item'>{{i['id']}} - {{i['nombre']}} (${{i['precio']}})</li>
-{% endfor %}
-</ul>
-</div>
-</div>
+<script>
+    function enviarPedido() {
+        // 1. TU NÚMERO DE TELÉFONO (Sin el +)
+        const miTelefono = "5491122334455"; // <-- CAMBIA ESTO
 
-<div class='col-md-4'>
-<div class='card p-3 mb-3'>
-<h5>Crear Hamburguesa</h5>
-<form method='post' action='/add_prod'>
-<input class='form-control mb-2' name='nombre' placeholder='Nombre' required>
-<input class='form-control mb-2' name='packaging' placeholder='Packaging' type='number' step='0.01' required>
-<input class='form-control mb-2' name='delivery' placeholder='Delivery' type='number' step='0.01' required>
-<input class='form-control mb-2' name='ingredientes' placeholder='Ej: 1=150,2=1' required>
-<button class='btn btn-success w-100'>Crear</button>
-</form>
-</div>
+        // 2. Obtener datos del cliente
+        const nombre = document.getElementById('userName').value;
+        const direccion = document.getElementById('userAddress').value;
+        const notas = document.getElementById('userNotes').value;
 
-<div class='card p-3'>
-<h5>Hamburguesas</h5>
-<ul class='list-group'>
-{% for p in productos %}
-<li class='list-group-item d-flex justify-content-between'>
-{{p['nombre']}}
-<a class='btn btn-sm btn-outline-primary' href='/cost/{{p['id']}}'>Costo</a>
-</li>
-{% endfor %}
-</ul>
-</div>
-</div>
+        if(!nombre || !direccion) {
+            alert("Por favor completa tu nombre y dirección.");
+            return;
+        }
 
-<div class='col-md-4'>
-<div class='card p-3'>
-<h5>Simulador</h5>
-<form method='post' action='/sim'>
-<input class='form-control mb-2' name='stock' placeholder='Ej: 1=5000,2=20' required>
-<button class='btn btn-dark w-100'>Simular</button>
-</form>
+        // 3. Obtener los productos seleccionados
+        let productosTexto = "";
+        const inputs = document.querySelectorAll('.item-qty');
+        
+        inputs.forEach(input => {
+            const cantidad = parseInt(input.value);
+            if (cantidad > 0) {
+                const nombreProducto = input.getAttribute('data-name');
+                productosTexto += `- ${cantidad} x ${nombreProducto}%0A`;
+            }
+        });
 
-{% if resultado %}
-<hr>
-<h6>Resultado</h6>
-<ul class='list-group'>
-{% for k,v in resultado.items() %}
-<li class='list-group-item'>{{k}}: {{v}}</li>
-{% endfor %}
-</ul>
+        if(productosTexto === "") {
+            alert("¡Debes elegir al menos una hamburguesa!");
+            return;
+        }
 
-<h6 class='mt-3'>Stock restante</h6>
-<ul class='list-group'>
-{% for k,v in restante.items() %}
-<li class='list-group-item'>{{k}}: {{v}}</li>
-{% endfor %}
-</ul>
-{% endif %}
+        // 4. Armar el mensaje final
+        let mensaje = `*PEDIDO PARA KIKO´S BURGUER*%0A%0A`;
+        mensaje += `*Nombre:* ${nombre}%0A`;
+        mensaje += `*Dirección:* ${direccion}%0A%0A`;
+        mensaje += `*Productos:*%0A${productosTexto}%0A`;
+        
+        if(notas) {
+            mensaje += `*Notas:* ${notas}%0A`;
+        }
 
-</div>
-</div>
-
-</div>
-</div>
+        // 5. Redirigir a WhatsApp
+        const url = `https://wa.me/${5401133786562}?text=${mensaje}`;
+        window.open(url, '_blank');
+    }
+</script>
 
 </body>
 </html>
-"""
-
-# ===================== ROUTES =====================
-
-@app.route('/')
-def index():
-    conn = get_db()
-    ingredientes = conn.execute("SELECT * FROM ingredientes").fetchall()
-    productos = conn.execute("SELECT * FROM productos").fetchall()
-    conn.close()
-    return render_template_string(TEMPLATE, ingredientes=ingredientes, productos=productos, resultado=None)
-
-@app.route('/add_ing', methods=['POST'])
-def add_ing():
-    conn = get_db()
-    conn.execute(
-        "INSERT INTO ingredientes (nombre, precio, unidad) VALUES (?, ?, ?)",
-        (request.form['nombre'], float(request.form['precio']), request.form['unidad'])
-    )
-    conn.commit()
-    conn.close()
-    return redirect('/')
-
-@app.route('/add_prod', methods=['POST'])
-def add_prod():
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute(
-        "INSERT INTO productos (nombre, packaging, delivery) VALUES (?, ?, ?)",
-        (request.form['nombre'], float(request.form['packaging']), float(request.form['delivery']))
-    )
-
-    pid = cur.lastrowid
-
-    for item in request.form['ingredientes'].split(','):
-        i, c = item.split('=')
-        cur.execute("INSERT INTO producto_ingrediente VALUES (?, ?, ?)", (pid, int(i), float(c)))
-
-    conn.commit()
-    conn.close()
-    return redirect('/')
-
-@app.route('/cost/<int:pid>')
-def cost(pid):
-    base, total = calcular_costo(pid)
-    return f"<h3>Costo base: {base:.2f}</h3><h3>Total: {total:.2f}</h3><a href='/'>Volver</a>"
-
-@app.route('/sim', methods=['POST'])
-def sim():
-    conn = get_db()
-
-    stock = {}
-    for item in request.form['stock'].split(','):
-        k, v = item.split('=')
-        stock[normalize_key(k)] = float(v)
-
-    productos = {}
-    nombres = {}
-
-    for p in conn.execute("SELECT id, nombre FROM productos"):
-        productos[p['id']] = {}
-        nombres[p['id']] = p['nombre']
-
-    for row in conn.execute("SELECT * FROM producto_ingrediente"):
-        productos[row['producto_id']][normalize_key(row['ingrediente_id'])] = row['cantidad']
-
-    result, restante = simular_produccion(stock, productos, list(productos.keys()))
-
-    conn.close()
-
-    return render_template_string(TEMPLATE, ingredientes=[], productos=[], resultado=result, restante=restante)
-
-# ===================== RUN =====================
-
-if __name__ == '__main__':
-    app.run(debug=True)
