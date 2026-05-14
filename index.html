@@ -1,313 +1,181 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiko's Burger - Terminal de Pedidos</title>
-    <style>
-        :root {
-            --rojo-ladrillo: #b23b22;
-            --negro-gris: #242526;
-            --blanco: #ffffff;
-            --gris-claro: #f4f5f7;
-            --texto-oscuro: #1a1a1a;
-        }
+/* Estilos Generales y Reseteo */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--gris-claro); color: var(--texto-oscuro); overflow: hidden; height: 100vh; }
+body {
+    background-color: #f5f5f5;
+    padding-bottom: 80px; /* Espacio para que el botón flotante no tape contenido */
+}
 
-        .pantalla-inicio {
-            position: fixed; inset: 0; background-color: var(--negro-gris);
-            display: flex; flex-direction: column; justify-content: space-between;
-            align-items: center; padding: 40px; text-align: center; z-index: 100; cursor: pointer;
-        }
+/* Contenedor Responsivo (Escritorio por defecto) */
+.app-container {
+    display: grid;
+    grid-template-columns: 250px 1fr 350px;
+    min-height: 100vh;
+}
 
-        .inicio-titulo h1 { color: var(--blanco); font-size: 3.5rem; text-transform: uppercase; letter-spacing: 2px; }
-        .inicio-titulo p { color: #a0a0a0; font-size: 1.2rem; margin-top: 10px; }
-        .boton-comenzar {
-            background-color: var(--rojo-ladrillo); color: var(--blanco); font-size: 1.8rem; font-weight: bold;
-            padding: 20px 40px; border-radius: 50px; text-transform: uppercase; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            animation: pulso 2s infinite;
-        }
+/* Lateral Izquierdo (Menú) */
+.sidebar {
+    background-color: #1a1a1a;
+    color: white;
+    padding: 20px;
+}
+.logo {
+    color: #e53935;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.categories a {
+    display: block;
+    color: #b3b3b3;
+    text-decoration: none;
+    padding: 12px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.categories a.active {
+    background-color: #e53935;
+    color: white;
+    border-radius: 4px;
+}
 
-        @keyframes pulso { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .app-container { display: flex; height: 100vh; width: 100vw; }
-        .sidebar { width: 260px; background-color: var(--negro-gris); display: flex; flex-direction: column; padding: 20px 10px; }
-        .sidebar-logo { color: var(--rojo-ladrillo); font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 30px; text-transform: uppercase; }
-        
-        .btn-categoria {
-            background: none; border: none; color: #cdcdcd; padding: 15px 20px; text-align: left;
-            font-size: 1.1rem; font-weight: bold; text-transform: uppercase; cursor: pointer;
-            border-radius: 12px; margin-bottom: 8px; transition: all 0.2s ease;
-        }
-        .btn-categoria.activo { background-color: var(--rojo-ladrillo); color: var(--blanco); }
+/* Sección Central (Productos) */
+.products-section {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+.products-section h2 {
+    color: #e53935;
+    border-bottom: 2px solid #e53935;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.product-card {
+    display: flex;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.product-img {
+    width: 100px;
+    height: 100px;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: #888;
+}
+.product-info {
+    flex: 1;
+    padding-left: 15px;
+}
+.product-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+.price {
+    color: #e53935;
+    font-weight: bold;
+}
+.btn-add {
+    background-color: #e53935;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-        .contenido-menu { flex: 1; padding: 30px; overflow-y: auto; }
-        .titulo-seccion { font-size: 2rem; text-transform: uppercase; color: var(--negro-gris); margin-bottom: 25px; border-bottom: 3px solid var(--rojo-ladrillo); padding-bottom: 5px; display: inline-block; }
-        .grid-productos { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-        
-        .tarjeta-producto {
-            background-color: var(--blanco); border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #e1e4e8;
-        }
-        .foto-placeholder { width: 100%; height: 140px; background-color: #eef0f3; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #9299a2; font-weight: bold; font-size: 1.2rem; }
-        .producto-nombre { font-size: 1.2rem; font-weight: bold; color: var(--negro-gris); }
-        .producto-desc { font-size: 0.85rem; color: #666; margin: 8px 0 15px 0; line-height: 1.3; }
-        .producto-pie { display: flex; justify-content: space-between; align-items: center; }
-        .producto-precio { font-size: 1.4rem; font-weight: 900; color: var(--rojo-ladrillo); }
-        .btn-agregar { background-color: var(--rojo-ladrillo); color: var(--blanco); border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; }
+/* Sección Derecha (Carrito) */
+.cart-section {
+    background: white;
+    padding: 20px;
+    border-left: 1px solid #e0e0e0;
+}
+.delivery-toggle {
+    display: flex;
+    margin: 15px 0;
+}
+.btn-toggle {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    background: white;
+}
+.btn-toggle.active {
+    background: #e53935;
+    color: white;
+    border-color: #e53935;
+}
+.cart-form input, .cart-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
 
-        .panel-carrito { width: 380px; background-color: var(--blanco); border-left: 1px solid #e1e4e8; display: flex; flex-direction: column; padding: 20px; }
-        .carrito-titulo { font-size: 1.4rem; font-weight: 800; color: var(--negro-gris); margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--gris-claro); }
-        .datos-delivery { margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
-        .selector-entrega, .selector-pago { display: flex; gap: 8px; margin-bottom: 2px; }
-        
-        .btn-tipo { flex: 1; padding: 8px; border: 2px solid #ccc; border-radius: 8px; font-weight: bold; font-size: 0.8rem; background: none; cursor: pointer; text-transform: uppercase; }
-        .btn-tipo.activo { border-color: var(--rojo-ladrillo); background-color: var(--rojo-ladrillo); color: var(--blanco); }
-        .input-cliente, .select-pago { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; outline: none; background: white; }
-        .input-cliente:focus, .select-pago:focus { border-color: var(--rojo-ladrillo); }
+/* Barra Fija Inferior (Celulares) */
+.whatsapp-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 15px;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
+}
+.btn-whatsapp {
+    background-color: #25D366; /* Verde Oficial WhatsApp */
+    color: white;
+    text-decoration: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
 
-        .lista-items { flex: 1; overflow-y: auto; margin-top: 10px; }
-        .item-carrito { display: flex; justify-content: space-between; align-items: center; background-color: var(--gris-claro); padding: 10px; border-radius: 12px; margin-bottom: 8px; }
-        .item-info h5 { font-size: 0.9rem; color: var(--negro-gris); }
-        .item-info span { color: var(--rojo-ladrillo); font-weight: bold; font-size: 0.85rem; }
-        .controles-cantidad { display: flex; align-items: center; gap: 8px; }
-        .btn-cantidad { width: 26px; height: 26px; border-radius: 6px; border: none; background-color: #ddd; font-weight: bold; cursor: pointer; }
+/* ==========================================
+   MEDIA QUERY: AJUSTES PARA CELULARES
+   ========================================== */
+@media (max-width: 850px) {
+    /* Transformar las 3 columnas en una sola fila vertical */
+    .app-container {
+        grid-template-columns: 1fr;
+    }
 
-        .carrito-totales { border-top: 2px solid #eef0f3; padding-top: 10px; margin-top: 5px; }
-        .fila-desglose { display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-bottom: 4px; }
-        .fila-total { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin: 8px 0; }
-        .total-monto { font-size: 1.5rem; font-weight: 900; color: var(--negro-gris); }
-        .btn-confirmar { width: 100%; background-color: #25D366; color: var(--blanco); border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: bold; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
-        .btn-confirmar:disabled { background-color: #ccc; box-shadow: none; cursor: not-allowed; }
+    /* Menú de categorías se vuelve horizontal superior */
+    .categories {
+        display: flex;
+        overflow-x: auto; /* Permite deslizar si hay muchas categorías */
+        white-space: nowrap;
+        padding-bottom: 5px;
+    }
+    .categories a {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 0;
+    }
 
-        @media (max-width: 900px) {
-            .app-container { flex-direction: column; overflow-y: auto; height: auto; }
-            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 10px; }
-            .sidebar-logo { display: none; }
-            .btn-categoria { margin-bottom: 0; margin-right: 8px; white-space: nowrap; }
-            .panel-carrito { width: 100%; height: auto; border-left: none; border-top: 1px solid #ccc; }
-            .lista-items { max-height: 180px; }
-            body { overflow: auto; height: auto; }
-        }
-    </style>
-</head>
-<body>
-
-    <div id="pantalla-inicio" class="pantalla-inicio" onclick="cambiarPantalla('menu')">
-        <div class="inicio-titulo">
-            <h1>Kiko's Burger</h1>
-            <p>Sabor real en cada bocado</p>
-        </div>
-        <div class="boton-comenzar">Hacé tu Pedido Acá</div>
-        <div style="color: #666; font-size: 0.9rem;">Plataforma de Pedidos Online</div>
-    </div>
-
-    <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-logo">Kiko's</div>
-            <button class="btn-categoria activo" onclick="filtrarCategoria('burguers', this)">Hamburguesas</button>
-            <button class="btn-categoria" onclick="onclick=filtrarCategoria('acompanamientos', this)">Papas Fritas</button>
-            <button class="btn-categoria" onclick="filtrarCategoria('nuggets', this)">Nuggets</button>
-            <button class="btn-categoria" onclick="filtrarCategoria('tequenos', this)">Tequeños Mini</button>
-        </div>
-
-        <div class="contenido-menu">
-            <h2 class="titulo-seccion" id="nombre-categoria">Hamburguesas</h2>
-            <div class="grid-productos" id="contenedor-productos"></div>
-        </div>
-
-        <div class="panel-carrito">
-            <h3 class="carrito-titulo">Mi Pedido</h3>
-            
-            <div class="datos-delivery">
-                <div class="selector-entrega">
-                    <button id="btn-delivery" class="btn-tipo activo" onclick="setTipoEntrega('Envío a Domicilio')">Delivery</button>
-                    <button id="btn-retiro" class="btn-tipo" onclick="setTipoEntrega('Retiro por Local')">Take Away</button>
-                </div>
-                <input type="text" id="cliente-nombre" class="input-cliente" placeholder="Nombre completo *" oninput="validarFormulario()">
-                <input type="text" id="cliente-direccion" class="input-cliente" placeholder="Dirección de entrega (Calle y N°) *" oninput="validarFormulario()">
-                
-                <!-- Selector de método de pago -->
-                <select id="cliente-pago" class="select-pago" onchange="validarFormulario()">
-                    <option value="" disabled selected>Método de Pago *</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Mercado Pago / Transferencia">Mercado Pago / Transferencia</option>
-                </select>
-                
-                <input type="text" id="cliente-nota" class="input-cliente" placeholder="Notas (Ej: Sin cebolla, pagar con $10.000...)">
-            </div>
-
-            <div class="lista-items" id="contenedor-carrito"></div>
-            
-            <div class="carrito-totales">
-                <div class="fila-desglose"><span>Subtotal Productos:</span><span id="subtotal-monto">$0</span></div>
-                <div class="fila-desglose" id="fila-envio"><span>Costo de Envío:</span><span id="envio-monto">$800</span></div>
-                <div class="fila-total">
-                    <span>Total:</span>
-                    <span class="total-monto" id="total-monto">$0</span>
-                </div>
-                <button class="btn-confirmar" id="btn-confirmar" disabled onclick="enviarAWhatsApp()">
-                    Confirmar por WhatsApp
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const TELEFONO_WHATSAPP = "5491154729675"; 
-        const COSTO_ENVIO = 800; // Podés cambiar este valor por tu costo real de delivery
-
-        const baseDeDatos = [
-            { id: 1, cat: 'burguers', nombre: 'Kiko\'s Clásica', precio: 4500, desc: 'Carne smashed, queso cheddar, lechuga, tomate y salsa de la casa.' },
-            { id: 2, cat: 'burguers', nombre: 'Kiko\'s Bacon', precio: 5200, desc: 'Doble carne smashed, doble queso cheddar, tocino crujiente y BBQ.' },
-            { id: 3, cat: 'acompanamientos', nombre: 'Papas Fritas Medianas', precio: 1800, desc: 'Papas seleccionadas crujientes con sal marina.' },
-            { id: 4, cat: 'acompanamientos', nombre: 'Papas Kiko\'s Especiales', precio: 2800, desc: 'Bañadas en salsa de queso cheddar fundido y tocino picado.' },
-            { id: 5, cat: 'nuggets', nombre: 'Nuggets x6 unidades', precio: 2200, desc: 'Crujientes trozos de pechuga acompañados de salsa honey mustard.' },
-            { id: 6, cat: 'nuggets', nombre: 'Nuggets x12 unidades', precio: 3800, desc: 'Para compartir. Incluye dos salsas a elección.' },
-            { id: 7, cat: 'tequenos', nombre: 'Tequeños Mini x8', precio: 2500, desc: 'Deditos de masa crujiente rellenos de queso llanero derretido.' }
-        ];
-
-        let carrito = [];
-        let categoriaSeleccionada = 'burguers';
-        let tipoEntrega = 'Envío a Domicilio';
-
-        function cambiarPantalla(pantalla) { document.getElementById('pantalla-inicio').style.display = 'none'; }
-
-        function setTipoEntrega(tipo) {
-            tipoEntrega = tipo;
-            const btnDel = document.getElementById('btn-delivery');
-            const btnRet = document.getElementById('btn-retiro');
-            const inputDir = document.getElementById('cliente-direccion');
-            const filaEnvio = document.getElementById('fila-envio');
-
-            if(tipo === 'Envío a Domicilio') {
-                btnDel.classList.add('activo'); btnRet.classList.remove('activo');
-                inputDir.style.display = 'block'; filaEnvio.style.display = 'flex';
-            } else {
-                btnRet.classList.add('activo'); btnDel.classList.remove('activo');
-                inputDir.style.display = 'none'; filaEnvio.style.display = 'none';
-            }
-            actualizarInterfazCarrito();
-        }
-
-        function filtrarCategoria(catId, boton) {
-            categoriaSeleccionada = catId;
-            document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('activo'));
-            boton.classList.add('activo');
-            const mapeoNombres = { burguers: 'Hamburguesas', acompanamientos: 'Papas Fritas', nuggets: 'Nuggets', tequenos: 'Tequeños Mini' };
-            document.getElementById('nombre-categoria').innerText = mapeoNombres[catId];
-            desplegarProductos();
-        }
-
-        function desplegarProductos() {
-            const contenedor = document.getElementById('contenedor-productos'); contenedor.innerHTML = '';
-            baseDeDatos.filter(p => p.cat === categoriaSeleccionada).forEach(prod => {
-                contenedor.innerHTML += `
-                    <div class="tarjeta-producto">
-                        <div>
-                            <div class="foto-placeholder">${prod.nombre.substring(0,5)}</div>
-                            <div class="producto-nombre">${prod.nombre}</div>
-                            <div class="producto-desc">${prod.desc}</div>
-                        </div>
-                        <div class="producto-pie">
-                            <span class="producto-precio">$${prod.precio}</span>
-                            <button class="btn-agregar" onclick="insertarAlCarrito(${prod.id})">Agregar</button>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function insertarAlCarrito(id) {
-            const itemExistente = carrito.find(i => i.id === id);
-            if (itemExistente) { itemExistente.cantidad++; } 
-            else { carrito.push({ ...baseDeDatos.find(p => p.id === id), cantidad: 1 }); }
-            actualizarInterfazCarrito();
-        }
-
-        function modificarCantidad(id, cambio) {
-            const item = carrito.find(i => i.id === id);
-            if (item) { item.cantidad += cambio; if (item.cantidad <= 0) { carrito = carrito.filter(i => i.id !== id); } }
-            actualizarInterfazCarrito();
-        }
-
-        function actualizarInterfazCarrito() {
-            const contenedor = document.getElementById('contenedor-carrito'); contenedor.innerHTML = '';
-            let subtotal = 0;
-
-            if (carrito.length === 0) { contenedor.innerHTML = '<p style="text-align:center; color:#999; margin-top:30px;">Tu carrito está vacío</p>'; } 
-            else {
-                carrito.forEach(item => {
-                    subtotal += item.precio * item.cantidad;
-                    contenedor.innerHTML += `
-                        <div class="item-carrito">
-                            <div class="item-info"><h5>${item.nombre}</h5><span>$${item.precio * item.cantidad}</span></div>
-                            <div class="controles-cantidad">
-                                <button class="btn-cantidad" onclick="modificarCantidad(${item.id}, -1)">-</button>
-                                <span style="font-weight:bold;">${item.cantidad}</span>
-                                <button class="btn-cantidad" onclick="modificarCantidad(${item.id}, 1)">+</button>
-                            </div>
-                        </div>`;
-                });
-            }
-
-            let costoEnvioActual = (tipoEntrega === 'Envío a Domicilio') ? COSTO_ENVIO : 0;
-            document.getElementById('subtotal-monto').innerText = '$' + subtotal;
-            document.getElementById('total-monto').innerText = '$' + (subtotal + costoEnvioActual);
-            validarFormulario();
-        }
-
-        function validarFormulario() {
-            const nombre = document.getElementById('cliente-nombre').value.trim();
-            const direccion = document.getElementById('cliente-direccion').value.trim();
-            const pago = document.getElementById('cliente-pago').value;
-            const btnConfirmar = document.getElementById('btn-confirmar');
-            
-            let camposValidos = false;
-            if (tipoEntrega === 'Envío a Domicilio') { camposValidos = nombre.length > 0 && direccion.length > 0 && pago !== ""; } 
-            else { camposValidos = nombre.length > 0 && pago !== ""; }
-
-            btnConfirmar.disabled = !(carrito.length > 0 && camposValidos);
-        }
-
-        function enviarAWhatsApp() {
-            const nombreCliente = document.getElementById('cliente-nombre').value.trim();
-            const direccionCliente = document.getElementById('cliente-direccion').value.trim();
-            const pagoCliente = document.getElementById('cliente-pago').value;
-            const notaCliente = document.getElementById('cliente-nota').value.trim() || 'Ninguna';
-            
-            let mensaje = `🍔 *NUEVO PEDIDO - KIKO'S BURGER* 🍔\n\n`;
-            mensaje += `👤 *Cliente:* ${nombreCliente}\n`;
-            mensaje += `🛵 *Modalidad:* ${tipoEntrega}\n`;
-            if(tipoEntrega === 'Envío a Domicilio') { mensaje += `📍 *Dirección:* ${direccionCliente}\n`; }
-            mensaje += `💳 *Pago:* ${pagoCliente}\n`;
-            mensaje += `📝 *Notas:* ${notaCliente}\n`;
-            mensaje += `----------------------------------------\n`;
-
-            let subtotal = 0;
-            carrito.forEach(item => {
-                subtotal += item.precio * item.cantidad;
-                mensaje += `▪️ ${item.cantidad}x ${item.nombre} ($${item.precio * item.cantidad})\n`;
-            });
-
-            let costoEnvioActual = (tipoEntrega === 'Envío a Domicilio') ? COSTO_ENVIO : 0;
-            mensaje += `----------------------------------------\n`;
-            if(tipoEntrega === 'Envío a Domicilio') { mensaje += `🔹 *Subtotal:* $${subtotal}\n🔹 *Envío:* $${costoEnvioActual}\n`; }
-            mensaje += `💰 *TOTAL A PAGAR:* $${subtotal + costoEnvioActual}\n\n`;
-            mensaje += `¡Pedido enviado desde la app web! 🔥`;
-
-            window.open(`wa.me{TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');
-
-            carrito = [];
-            document.getElementById('cliente-nombre').value = '';
-            document.getElementById('cliente-direccion').value = '';
-            document.getElementById('cliente-pago').selectedIndex = 0;
-            document.getElementById('cliente-nota').value = '';
-            actualizarInterfazCarrito();
-            document.getElementById('pantalla-inicio').style.display = 'flex';
-        }
-
-        desplegarProductos();
-    </script>
-</body>
-</html>
+    /* Quitar bordes laterales innecesarios en móvil */
+    .cart-section {
+        border-left: none;
+        border-top: 2px solid #e0e0e0;
+    }
+}
