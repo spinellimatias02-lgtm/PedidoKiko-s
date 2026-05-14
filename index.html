@@ -1,13 +1,161 @@
-@media (max-width: 850px) {
-    .app-container {
-        grid-template-columns: 1fr;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiko's Burgers</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Contenedor Principal Adaptable (Grid) -->
+    <div class="app-container">
+        
+        <!-- 1. Menú de Categorías -->
+        <aside class="sidebar">
+            <h1 class="logo">KIKO'S</h1>
+            <nav class="categories">
+                <a href="#">HAMBURGUESAS</a>
+                <a href="#">PAPAS FRITAS</a>
+                <a href="#" class="active">NUGGETS</a>
+                <a href="#">TEQUEÑOS MINI</a>
+            </nav>
+        </aside>
+
+        <!-- 2. Lista de Productos -->
+        <main class="products-section">
+            <h2>NUGGETS</h2>
+            
+            <div class="product-card">
+                <div class="product-img">Nuggets</div>
+                <div class="product-info">
+                    <h3>Nuggets x6 unidades</h3>
+                    <p>Crujientes trozos de pechuga acompañados de salsa honey mustard.</p>
+                    <div class="product-price-row">
+                        <span class="price">$2200</span>
+                        <button class="btn-add">AGREGAR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-img">Nuggets</div>
+                <div class="product-info">
+                    <h3>Nuggets x12 unidades</h3>
+                    <p>Para compartir. Incluye dos salsas a elección.</p>
+                    <div class="product-price-row">
+                        <span class="price">$3800</span>
+                        <button class="btn-add">AGREGAR</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 3. Sección Mi Pedido / Formulario -->
+        <section class="cart-section">
+            <h2>Mi Pedido</h2>
+            <div class="delivery-toggle">
+                <button class="btn-toggle active">DELIVERY</button>
+                <button class="btn-toggle">TAKE AWAY</button>
+            </div>
+            
+            <form class="cart-form" onsubmit="event.preventDefault();">
+                <input type="text" id="cart-nombre" placeholder="Nombre" value="Matías">
+                <input type="text" id="cart-direccion" placeholder="Dirección" value="Medina 864">
+                <select id="cart-pago">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                </select>
+                <input type="text" id="cart-notas" placeholder="Aclaraciones (ej: sin cheddar)" value="Sin cheddar y extra panceta">
+            </form>
+
+            <div class="cart-items">
+                <div class="cart-item">
+                    <div class="item-details">
+                        <h4>Kiko's Clásica</h4>
+                        <span class="item-price">$13500</span>
+                    </div>
+                    <div class="quantity-control">
+                        <button>-</button>
+                        <span>3</span>
+                        <button>+</button>
+                    </div>
+                </div>
+                <div class="cart-item">
+                    <div class="item-details">
+                        <h4>Papas Fritas Medianas</h4>
+                        <span class="item-price">$1800</span>
+                    </div>
+                    <div class="quantity-control">
+                        <button>-</button>
+                        <span>1</span>
+                        <button>+</button>
+                    </div>
+                </div>
+                <div class="cart-item">
+                    <div class="item-details">
+                        <h4>Nuggets x6 unidades</h4>
+                        <span class="item-price">$2200</span>
+                    </div>
+                    <div class="quantity-control">
+                        <button>-</button>
+                        <span>1</span>
+                        <button>+</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Botón Flotante / Barra Fija para Finalizar Pedido -->
+    <div class="whatsapp-footer">
+        <button onclick="enviarPedidoWhatsApp()" class="btn-whatsapp">
+            FINALIZAR PEDIDO (Enviar a WhatsApp)
+        </button>
+    </div>
+
+    <!-- Script de Integración con WhatsApp -->
+    <script>
+    function enviarPedidoWhatsApp() {
+        // IMPORTANTE: Cambia este número por tu número de WhatsApp real con código de país
+        const miTelefono = "5491100000000"; 
+
+        // Captura de datos del formulario
+        const nombre = document.getElementById('cart-nombre').value.trim() || "No especificado";
+        const direccion = document.getElementById('cart-direccion').value.trim() || "No especificada";
+        const pago = document.getElementById('cart-pago').value;
+        const notas = document.getElementById('cart-notas').value.trim() || "Ninguna";
+
+        // Estructura inicial del mensaje
+        let mensaje = `🍔 *NUEVO PEDIDO - KIKO'S*\n\n`;
+        mensaje += `👤 *Cliente:* ${nombre}\n`;
+        mensaje += `📍 *Dirección:* ${direccion}\n`;
+        mensaje += `💳 *Método de Pago:* ${pago}\n`;
+        mensaje += `📝 *Notas:* ${notas}\n\n`;
+        mensaje += `🛒 *Detalle del pedido:*\n`;
+
+        // Procesar productos dentro del carrito
+        const items = document.querySelectorAll('.cart-item');
+        
+        if(items.length === 0) {
+            alert("Tu carrito está vacío.");
+            return;
+        }
+
+        items.forEach(item => {
+            const titulo = item.querySelector('h4').innerText;
+            const precio = item.querySelector('.item-price').innerText;
+            const cantidad = item.querySelector('.quantity-control span').innerText;
+            mensaje += `• ${cantidad}x ${titulo} (${precio})\n`;
+        });
+
+        // Crear enlace de WhatsApp unificado para PC y Móvil
+        const urlWhatsApp = `wa.me{miTelefono}?text=${encodeURIComponent(mensaje)}`;
+        
+        // Abrir ventana
+        window.open(urlWhatsApp, '_blank');
     }
-    .categories {
-        display: flex;
-        overflow-x: auto;
-    }
-    .cart-section {
-        border-left: none;
-        border-top: 2px solid #e0e0e0;
-    }
-} /* Asegúrate de que esta última llave exista */
+    </script>
+</body>
+</html>
