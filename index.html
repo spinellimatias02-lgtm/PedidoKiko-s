@@ -1,161 +1,635 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiko's Burgers</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Kiko's Burger</title>
+
+<style>
+
+:root{
+    --rojo:#b23b22;
+    --negro:#242526;
+    --blanco:#ffffff;
+    --gris:#f4f5f7;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:var(--gris);
+    color:#111;
+}
+
+/* INICIO */
+
+.pantalla-inicio{
+    position:fixed;
+    inset:0;
+    background:var(--negro);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:30px;
+    z-index:999;
+    text-align:center;
+    padding:20px;
+}
+
+.pantalla-inicio h1{
+    color:white;
+    font-size:3rem;
+}
+
+.pantalla-inicio p{
+    color:#bbb;
+}
+
+.boton-comenzar{
+    background:var(--rojo);
+    color:white;
+    padding:18px 30px;
+    border-radius:50px;
+    font-size:1.2rem;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* APP */
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* MENU */
+
+.sidebar{
+    width:240px;
+    background:var(--negro);
+    padding:20px;
+}
+
+.logo{
+    color:var(--rojo);
+    font-size:2rem;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.btn-cat{
+    width:100%;
+    border:none;
+    padding:14px;
+    margin-bottom:10px;
+    border-radius:12px;
+    background:#333;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-cat.activo{
+    background:var(--rojo);
+}
+
+/* PRODUCTOS */
+
+.contenido{
+    flex:1;
+    padding:20px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.img{
+    height:140px;
+    border-radius:12px;
+    background:#ddd;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+}
+
+.nombre{
+    font-size:1.1rem;
+    font-weight:bold;
+}
+
+.desc{
+    color:#666;
+    font-size:.9rem;
+    margin:10px 0;
+}
+
+.footer-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.precio{
+    color:var(--rojo);
+    font-size:1.3rem;
+    font-weight:bold;
+}
+
+.btn-agregar{
+    background:var(--rojo);
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* CARRITO */
+
+.carrito{
+    width:350px;
+    background:white;
+    border-left:1px solid #ddd;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.carrito h2{
+    margin-bottom:15px;
+}
+
+.inputs{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.inputs input{
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+.selector{
+    display:flex;
+    gap:10px;
+}
+
+.selector button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.selector .activo{
+    background:var(--rojo);
+    color:white;
+}
+
+.items{
+    flex:1;
+    overflow:auto;
+}
+
+.item{
+    background:var(--gris);
+    padding:10px;
+    border-radius:12px;
+    margin-bottom:10px;
+}
+
+.total{
+    font-size:1.5rem;
+    font-weight:bold;
+    margin:15px 0;
+}
+
+.btn-finalizar{
+    background:#25D366;
+    color:white;
+    border:none;
+    padding:16px;
+    border-radius:15px;
+    font-size:1rem;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+    .app{
+        flex-direction:column;
+    }
+
+    .sidebar{
+        width:100%;
+        display:flex;
+        overflow:auto;
+        gap:10px;
+    }
+
+    .logo{
+        display:none;
+    }
+
+    .btn-cat{
+        min-width:170px;
+        margin:0;
+    }
+
+    .carrito{
+        width:100%;
+        border-left:none;
+        border-top:1px solid #ddd;
+    }
+
+}
+
+</style>
 </head>
 <body>
 
-    <!-- Contenedor Principal Adaptable (Grid) -->
-    <div class="app-container">
-        
-        <!-- 1. Menú de Categorías -->
-        <aside class="sidebar">
-            <h1 class="logo">KIKO'S</h1>
-            <nav class="categories">
-                <a href="#">HAMBURGUESAS</a>
-                <a href="#">PAPAS FRITAS</a>
-                <a href="#" class="active">NUGGETS</a>
-                <a href="#">TEQUEÑOS MINI</a>
-            </nav>
-        </aside>
+<div class="pantalla-inicio" id="inicio">
+    <h1>Kiko's Burger</h1>
+    <p>Sabor real en cada bocado</p>
 
-        <!-- 2. Lista de Productos -->
-        <main class="products-section">
-            <h2>NUGGETS</h2>
-            
-            <div class="product-card">
-                <div class="product-img">Nuggets</div>
-                <div class="product-info">
-                    <h3>Nuggets x6 unidades</h3>
-                    <p>Crujientes trozos de pechuga acompañados de salsa honey mustard.</p>
-                    <div class="product-price-row">
-                        <span class="price">$2200</span>
-                        <button class="btn-add">AGREGAR</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-img">Nuggets</div>
-                <div class="product-info">
-                    <h3>Nuggets x12 unidades</h3>
-                    <p>Para compartir. Incluye dos salsas a elección.</p>
-                    <div class="product-price-row">
-                        <span class="price">$3800</span>
-                        <button class="btn-add">AGREGAR</button>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- 3. Sección Mi Pedido / Formulario -->
-        <section class="cart-section">
-            <h2>Mi Pedido</h2>
-            <div class="delivery-toggle">
-                <button class="btn-toggle active">DELIVERY</button>
-                <button class="btn-toggle">TAKE AWAY</button>
-            </div>
-            
-            <form class="cart-form" onsubmit="event.preventDefault();">
-                <input type="text" id="cart-nombre" placeholder="Nombre" value="Matías">
-                <input type="text" id="cart-direccion" placeholder="Dirección" value="Medina 864">
-                <select id="cart-pago">
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Transferencia">Transferencia</option>
-                </select>
-                <input type="text" id="cart-notas" placeholder="Aclaraciones (ej: sin cheddar)" value="Sin cheddar y extra panceta">
-            </form>
-
-            <div class="cart-items">
-                <div class="cart-item">
-                    <div class="item-details">
-                        <h4>Kiko's Clásica</h4>
-                        <span class="item-price">$13500</span>
-                    </div>
-                    <div class="quantity-control">
-                        <button>-</button>
-                        <span>3</span>
-                        <button>+</button>
-                    </div>
-                </div>
-                <div class="cart-item">
-                    <div class="item-details">
-                        <h4>Papas Fritas Medianas</h4>
-                        <span class="item-price">$1800</span>
-                    </div>
-                    <div class="quantity-control">
-                        <button>-</button>
-                        <span>1</span>
-                        <button>+</button>
-                    </div>
-                </div>
-                <div class="cart-item">
-                    <div class="item-details">
-                        <h4>Nuggets x6 unidades</h4>
-                        <span class="item-price">$2200</span>
-                    </div>
-                    <div class="quantity-control">
-                        <button>-</button>
-                        <span>1</span>
-                        <button>+</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
+    <div class="boton-comenzar" onclick="entrar()">
+        HACER PEDIDO
     </div>
+</div>
 
-    <!-- Botón Flotante / Barra Fija para Finalizar Pedido -->
-    <div class="whatsapp-footer">
-        <button onclick="enviarPedidoWhatsApp()" class="btn-whatsapp">
-            FINALIZAR PEDIDO (Enviar a WhatsApp)
+<div class="app">
+
+    <div class="sidebar">
+
+        <div class="logo">Kiko's</div>
+
+        <button class="btn-cat activo" onclick="categoria('burguers',this)">
+            Hamburguesas
         </button>
+
+        <button class="btn-cat" onclick="categoria('papas',this)">
+            Papas
+        </button>
+
+        <button class="btn-cat" onclick="categoria('nuggets',this)">
+            Nuggets
+        </button>
+
     </div>
 
-    <!-- Script de Integración con WhatsApp -->
-    <script>
-    function enviarPedidoWhatsApp() {
-        // IMPORTANTE: Cambia este número por tu número de WhatsApp real con código de país
-        const miTelefono = "5491100000000"; 
+    <div class="contenido">
 
-        // Captura de datos del formulario
-        const nombre = document.getElementById('cart-nombre').value.trim() || "No especificado";
-        const direccion = document.getElementById('cart-direccion').value.trim() || "No especificada";
-        const pago = document.getElementById('cart-pago').value;
-        const notas = document.getElementById('cart-notas').value.trim() || "Ninguna";
+        <h1 id="titulo">Hamburguesas</h1>
 
-        // Estructura inicial del mensaje
-        let mensaje = `🍔 *NUEVO PEDIDO - KIKO'S*\n\n`;
-        mensaje += `👤 *Cliente:* ${nombre}\n`;
-        mensaje += `📍 *Dirección:* ${direccion}\n`;
-        mensaje += `💳 *Método de Pago:* ${pago}\n`;
-        mensaje += `📝 *Notas:* ${notas}\n\n`;
-        mensaje += `🛒 *Detalle del pedido:*\n`;
+        <br>
 
-        // Procesar productos dentro del carrito
-        const items = document.querySelectorAll('.cart-item');
-        
-        if(items.length === 0) {
-            alert("Tu carrito está vacío.");
-            return;
-        }
+        <div class="grid" id="productos"></div>
 
-        items.forEach(item => {
-            const titulo = item.querySelector('h4').innerText;
-            const precio = item.querySelector('.item-price').innerText;
-            const cantidad = item.querySelector('.quantity-control span').innerText;
-            mensaje += `• ${cantidad}x ${titulo} (${precio})\n`;
+    </div>
+
+    <div class="carrito">
+
+        <h2>Mi Pedido</h2>
+
+        <div class="selector">
+
+            <button class="activo" id="btnDelivery"
+            onclick="tipo('Delivery')">
+                Delivery
+            </button>
+
+            <button id="btnRetiro"
+            onclick="tipo('Retiro')">
+                Retiro
+            </button>
+
+        </div>
+
+        <br>
+
+        <div class="inputs">
+
+            <input id="nombre"
+            placeholder="Nombre completo">
+
+            <input id="direccion"
+            placeholder="Dirección">
+
+            <input id="nota"
+            placeholder="Notas del pedido">
+
+        </div>
+
+        <div class="items" id="items"></div>
+
+        <div class="total" id="total">
+            $0
+        </div>
+
+        <button class="btn-finalizar"
+        onclick="finalizarPedido()">
+            Finalizar por WhatsApp
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const TELEFONO="5491154729675";
+
+let modo="Delivery";
+
+const productos=[
+
+{
+id:1,
+cat:"burguers",
+nombre:"Kiko's Clásica",
+precio:4500,
+desc:"Carne smashed, cheddar y salsa."
+},
+
+{
+id:2,
+cat:"burguers",
+nombre:"Kiko's Bacon",
+precio:5200,
+desc:"Doble carne, cheddar y bacon."
+},
+
+{
+id:3,
+cat:"papas",
+nombre:"Papas Fritas",
+precio:1800,
+desc:"Papas crocantes."
+},
+
+{
+id:4,
+cat:"nuggets",
+nombre:"Nuggets x6",
+precio:2200,
+desc:"Nuggets con salsa."
+}
+
+];
+
+let carrito=[];
+
+function entrar(){
+    document.getElementById("inicio").style.display="none";
+}
+
+function categoria(cat,btn){
+
+    document.querySelectorAll(".btn-cat")
+    .forEach(b=>b.classList.remove("activo"));
+
+    btn.classList.add("activo");
+
+    render(cat);
+}
+
+function render(cat){
+
+    const cont=document.getElementById("productos");
+
+    cont.innerHTML="";
+
+    productos
+    .filter(p=>p.cat===cat)
+    .forEach(p=>{
+
+        cont.innerHTML+=`
+
+        <div class="card">
+
+            <div class="img">
+                ${p.nombre}
+            </div>
+
+            <div class="nombre">
+                ${p.nombre}
+            </div>
+
+            <div class="desc">
+                ${p.desc}
+            </div>
+
+            <div class="footer-card">
+
+                <div class="precio">
+                    $${p.precio}
+                </div>
+
+                <button class="btn-agregar"
+                onclick="agregar(${p.id})">
+                    Agregar
+                </button>
+
+            </div>
+
+        </div>
+
+        `;
+    });
+}
+
+function agregar(id){
+
+    const existe=carrito.find(i=>i.id===id);
+
+    if(existe){
+        existe.cantidad++;
+    }else{
+
+        const prod=productos.find(p=>p.id===id);
+
+        carrito.push({
+            ...prod,
+            cantidad:1
         });
 
-        // Crear enlace de WhatsApp unificado para PC y Móvil
-        const urlWhatsApp = `wa.me{miTelefono}?text=${encodeURIComponent(mensaje)}`;
-        
-        // Abrir ventana
-        window.open(urlWhatsApp, '_blank');
     }
-    </script>
+
+    actualizar();
+}
+
+function actualizar(){
+
+    const items=document.getElementById("items");
+
+    items.innerHTML="";
+
+    let total=0;
+
+    carrito.forEach(i=>{
+
+        total+=i.precio*i.cantidad;
+
+        items.innerHTML+=`
+
+        <div class="item">
+
+            <strong>${i.nombre}</strong>
+
+            <br>
+
+            ${i.cantidad} x $${i.precio}
+
+            <br><br>
+
+            <button onclick="menos(${i.id})">-</button>
+
+            <button onclick="mas(${i.id})">+</button>
+
+        </div>
+
+        `;
+    });
+
+    document.getElementById("total")
+    .innerText="$"+total;
+}
+
+function mas(id){
+
+    carrito.find(i=>i.id===id).cantidad++;
+
+    actualizar();
+}
+
+function menos(id){
+
+    const item=carrito.find(i=>i.id===id);
+
+    item.cantidad--;
+
+    if(item.cantidad<=0){
+        carrito=carrito.filter(i=>i.id!==id);
+    }
+
+    actualizar();
+}
+
+function tipo(t){
+
+    modo=t;
+
+    document.getElementById("btnDelivery")
+    .classList.remove("activo");
+
+    document.getElementById("btnRetiro")
+    .classList.remove("activo");
+
+    if(t==="Delivery"){
+
+        document.getElementById("btnDelivery")
+        .classList.add("activo");
+
+        document.getElementById("direccion")
+        .style.display="block";
+
+    }else{
+
+        document.getElementById("btnRetiro")
+        .classList.add("activo");
+
+        document.getElementById("direccion")
+        .style.display="none";
+
+    }
+
+}
+
+function finalizarPedido(){
+
+    if(carrito.length===0){
+        alert("Agregá productos");
+        return;
+    }
+
+    const nombre=
+    document.getElementById("nombre").value;
+
+    if(nombre===""){
+        alert("Ingresá tu nombre");
+        return;
+    }
+
+    const direccion=
+    document.getElementById("direccion").value;
+
+    let mensaje=
+`🍔 *NUEVO PEDIDO* 🍔
+
+👤 Nombre: ${nombre}
+
+🚚 Tipo: ${modo}
+
+📍 Dirección: ${direccion}
+
+`;
+
+    let total=0;
+
+    carrito.forEach(i=>{
+
+        total+=i.precio*i.cantidad;
+
+        mensaje+=
+`• ${i.nombre} x${i.cantidad} - $${i.precio*i.cantidad}
+`;
+
+    });
+
+    mensaje+=`
+-------------------
+💰 TOTAL: $${total}
+`;
+
+    const url=
+`https://wa.me/${TELEFONO}?text=${encodeURIComponent(mensaje)}`;
+
+    window.open(url,"_blank");
+
+}
+
+render("burguers");
+
+</script>
+
 </body>
 </html>
